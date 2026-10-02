@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import me.onlyjordon.nicknamingapi.Nicknamer;
-import me.onlyjordon.nicknamingapi.utils.SkinLayers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -23,57 +21,47 @@ public final class CommandToggleCape implements CommandExecutor, TabCompleter {
     private static final Component PLAYER_NOT_FOUND = Component.text("Player not found.")
         .color(NamedTextColor.RED);
 
-    private final Nicknamer nicknamer;
+    private final CapeHider plugin;
 
-    public CommandToggleCape(Nicknamer nicknamer) {
-        this.nicknamer = nicknamer;
+    public CommandToggleCape(CapeHider plugin) {
+        this.plugin = plugin;
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            if (!sender.hasPermission("capehider.togglecape.self")) {
-                return false;
-            }
+            if (!sender.hasPermission("capehider.togglecape.self")) return false;
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(PLAYERS_ONLY);
                 return true;
             }
-            toggleCape(player);
+            boolean nowVisible = plugin.toggleCape(player);
+            sender.sendMessage(Component.text("Your cape is now " + (nowVisible ? "visible" : "hidden") + ".",
+                    nowVisible ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
             return true;
         }
-        if (!sender.hasPermission("capehider.togglecape.others")) {
-            return false;
-        }
-        Player target = nicknamer.getPlayerWithNick(args[0]);
+        if (!sender.hasPermission("capehider.togglecape.others")) return false;
+
+        Player target = Bukkit.getPlayerExact(args[0]);
         if (target == null) {
             sender.sendMessage(PLAYER_NOT_FOUND);
             return true;
         }
-        toggleCape(target);
+        boolean nowVisible = plugin.toggleCape(target);
+        sender.sendMessage(Component.text(target.getName() + "'s cape is now " + (nowVisible ? "visible" : "hidden") + ".",
+                nowVisible ? NamedTextColor.GREEN : NamedTextColor.YELLOW));
         return true;
-    }
-
-    private void toggleCape(Player player) {
-        boolean nowVisible = !nicknamer.getVisibleSkinLayers(player).contains(SkinLayers.SkinLayer.CAPE);
-        nicknamer.setSkinLayerVisible(player, SkinLayers.SkinLayer.CAPE, nowVisible);
-        nicknamer.refreshPlayer(player);
     }
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (args.length != 1 || !sender.hasPermission("capehider.togglecape.others")) {
-            return List.of();
-        }
+        if (args.length != 1 || !sender.hasPermission("capehider.togglecape.others")) return List.of();
+
         String prefix = args[0].toLowerCase(Locale.ROOT);
         List<String> result = new ArrayList<>();
         for (Player player : Bukkit.getOnlinePlayers()) {
-            String nick = nicknamer.getNick(player);
-            if (nick == null) {
-                nick = player.getName();
-            }
-            if (nick.toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                result.add(nick);
+            if (player.getName().toLowerCase(Locale.ROOT).startsWith(prefix)) {
+                result.add(player.getName());
             }
         }
         return result;

@@ -4,6 +4,7 @@ main: me.onlyjordon.capehider.CapeHider
 api-version: "$apiVersion"
 folia-supported: true
 description: $description
+authors: [ Pa7entt, onlyjordon ]
 commands:
   togglecape:
     description: Toggle cape visibility for yourself or another player.
@@ -22,8 +23,3 @@ permissions:
   capehider.bypass:
     description: Skip having the cape hidden on join.
     default: false
-dependencies:
-  server:
-    nicknamer-api:
-      required: true
-      load: BEFORE

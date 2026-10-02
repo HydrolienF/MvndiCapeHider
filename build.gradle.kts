@@ -4,20 +4,19 @@ plugins {
 }
 
 group = "me.onlyjordon"
-version = "1.2.0"
-description = "Hide all capes via the Nicknamer API"
+version = "2.0.0"
+description = "Hide all capes via Paper's native SkinParts API — no external dependencies"
 
 var mainMinecraftVersion = "1.21.11"
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://jitpack.io")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:$mainMinecraftVersion-R0.1-SNAPSHOT")
-    compileOnly("com.github.jordoncodes:nicknamer-api:v1.3.0")
+    // NO Nicknamer API dependency — uses Paper's native SkinParts API
 }
 
 java {
@@ -39,7 +38,7 @@ tasks {
             "apiVersion" to "1.21"
         )
         inputs.properties(props)
-        filesMatching("paper-plugin.yml") {
+        filesMatching("plugin.yml") {
             expand(props)
         }
     }
